@@ -1,4 +1,4 @@
-from wordcloud import WordCloud
+from wordcloud import WordCloud, ImageColorGenerator
 import streamlit as st
 import numpy as np
 from PIL import Image 
@@ -48,13 +48,16 @@ expander2.write("if you use your own mask image, its background color must be wh
 ownmaskimg = expander2.file_uploader("Upload mask",accept_multiple_files=False)
 useownmask = expander2.toggle("apply your mask")
 
+
 edge_color = "white"
 edge_size = 0
+colorapply = False
 if useownmask:
     edge = expander2.toggle("add edge")
+    colorapply = expander2.toggle("apply image color")
     if edge:
-        edge_size = expander2.number_input("size",1,100)
-        edge_color = expander2.selectbox("color",["white","black"])
+        edge_size = expander2.number_input("edge size",1,100)
+        edge_color = expander2.selectbox("edge color",["white","black"])
 
 "---"
 
@@ -96,6 +99,7 @@ else:
             contour_width=edge_size
             )
         wc.generate(text)
+        wc = wc if not colorapply else wc.recolor(color_func=(ImageColorGenerator(np.array(Image.open(ownmaskimg)))))
         wc.to_file("img.png")
         st.image("img.png",use_column_width=True)
 
